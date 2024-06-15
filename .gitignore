@@ -1,0 +1,8 @@
+.vscode/
+__pycache__/
+database/
+log/
+model/__pycache__/
+model/picture.py.bkp
+backup_db/*
+.env

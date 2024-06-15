@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+flask-openapi3
+Flask-SQLAlchemy
+nose2
+pydantic
+SQLAlchemy
+SQLAlchemy-Utils
+SQLAlchemy-ImageAttach
+typing_extensions
+Unidecode
+python-dotenv
