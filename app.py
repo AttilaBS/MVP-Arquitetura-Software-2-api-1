@@ -65,17 +65,17 @@ def create(form: ReminderSchema):
         return show_reminder(reminder), 200
 
     except IntegrityError:
-        error_msg = 'Lembrete de mesmo nome já salvo na base :/'
+        error_msg = 'Lembrete de mesmo nome já salvo :/'
         logger.warning('Erro ao adicionar lembrete %s - %s', reminder.name, error_msg)
 
-        return {'mensagem': error_msg}, 409
+        return format_error_response(error_msg, 409)
 
     except Exception as error:
-        error_msg = 'Ocorreu um erro ao salvar o lembrete na base'
+        error_msg = 'Ocorreu um erro ao salvar o lembrete.'
         logger.warning(' %s : %s', error_msg, error)
         logger.debug(' %s : %s', error_msg, error)
 
-        return {'mensagem': error_msg}, 400
+        return format_error_response(error_msg, 400)
 
 @app.get('/reminder', tags = [reminder_tag],
         responses = {'200': ReminderViewSchema, '404': ErrorSchema})
@@ -95,7 +95,7 @@ def get_reminder(query: ReminderSearchSchema):
         logger.debug('Exceção : %s', error)
         logger.warning('Erro ao buscar lembrete %s : %s', reminder_id, error_msg)
 
-        return {'mensagem': error_msg}, 404
+        return format_error_response(error_msg, 404)
     logger.debug('Lembrete econtrado: %s', reminder.name)
 
     return show_reminder(reminder), 200
@@ -116,7 +116,7 @@ def get_reminder_name(query: ReminderSearchByNameSchema):
     error_msg = 'O lembrete buscado não existe.'
     if not reminder:
         logger.warning('Erro ao buscar lembrete %s - %s', reminder_name, error_msg)
-        return {'mensagem': error_msg}, 404
+        return format_error_response(error_msg, 404)
 
     logger.debug('Lembrete encontrado: %s', reminder.name)
     return show_reminder(reminder), 200
@@ -178,7 +178,7 @@ def update(form: ReminderUpdateSchema):
     except Exception as error:
         error_msg = 'Ocorreu um erro ao salvar o lembrete na base'
         logger.info(' %s : %s', error_msg, error)
-        return {'mensagem': error_msg}, 400
+        return format_error_response(error_msg, 500)
 
 @app.delete('/delete', tags = [reminder_tag],
             responses = {'200': ReminderDeleteSchema, '404': ErrorSchema})
@@ -199,7 +199,7 @@ def delete_reminder(query: ReminderSearchSchema):
     except:
         error_msg = 'Lembrete não encontrado :/'
         logger.warning('Erro ao deletar lembrete # %d - %s', reminder_id, error_msg)
-        return {'mensagem': error_msg}, 404
+        return format_error_response(error_msg, 404)
 
     logger.debug('Lembrete # %d removido com sucesso.', reminder_id)
     return {'mensagem': 'Lembrete removido', 'nome': reminder.name}
@@ -239,3 +239,15 @@ def validate_send_email(query: ReminderSearchSchema):
         if not reminder.send_email:
             return {'mensagem': 'O usuário optou por não receber email.'}, 200
         return {'mensagem': f'A data do lembrete é {reminder.due_date} e, portanto, superior à 1 dia a data atual'}, 200
+
+@app.route('/format_error')
+def format_error_response(error_message:str, status:int) -> list:
+    response = [
+        {
+            'ctx': {
+                'error': error_message
+            }
+        }
+    ]
+
+    return response, status
