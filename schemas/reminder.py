@@ -17,7 +17,7 @@ class ReminderSchema(BaseModel):
     description: str = 'trocar o óleo a cada 10 mil km no Moraes AutoCenter'
     due_date: str = '2023-09-20T00:00:00.000Z'
     send_email: Optional[bool] = False
-    email: Optional[str]
+    email: str
     recurring: Optional[bool] = False
 
     @validator('name', allow_reuse = True)
@@ -36,6 +36,13 @@ class ReminderSchema(BaseModel):
             raise ValueError('A descrição não pode ser vazia!')
         return parameter
 
+    @validator('email', allow_reuse = True, check_fields=False)
+    def validator_email(cls, parameter):
+        '''Validator for email'''
+        if not len(parameter) > 0:
+            raise ValueError('O email não pode ser vazio!')
+        return parameter
+
 
 class ReminderUpdateSchema(BaseModel):
     '''
@@ -47,7 +54,7 @@ class ReminderUpdateSchema(BaseModel):
     description: Optional[str] = 'Marcar o retorno da consulta'
     due_date: Optional[datetime] = '2023-10-20T00:00:00.000Z'
     send_email: Optional[bool] = True
-    email: Optional[str] = 'emaildeexemplo@email.com'
+    email: str = 'emaildeexemplo@email.com'
     recurring: Optional[bool] = False
     updated_at: datetime = datetime.now()
 
