@@ -1,6 +1,9 @@
 # Define a imagem base
 FROM python:3.9
 
+# Instalação das net-tools
+RUN apt-get update && apt-get install -y net-tools
+
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 

@@ -1,6 +1,7 @@
 services:
-  api-1:
-    build: .
+  api1:
+    build:
+      context: .
     ports:
       - "5000:5000"
     volumes:
@@ -8,6 +9,41 @@ services:
       - ./log:/app/log
       - ./database:/app/database
     environment:
-      FLASK_APP: app.py
       FLASK_ENV: development
-    container_name: api-1
+    container_name: mvp_api1
+    networks:
+      - common-network
+
+  api2:
+    build:
+      context: ../api2
+    ports:
+      - "5001:5000"
+    volumes:
+      - ../api2:/app
+      - ../log:/api2/log
+      - ../database:/api2/database
+    environment:
+      FLASK_ENV: development
+    container_name: mvp_api2
+    depends_on:
+      - api1
+    networks:
+      - common-network
+
+  frontend:
+    build:
+      context: ../frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ..:/frontend
+    container_name: mvp_frontend
+    depends_on:
+      - api1
+    networks:
+      - common-network
+
+networks:
+  common-network:
+    driver: bridge

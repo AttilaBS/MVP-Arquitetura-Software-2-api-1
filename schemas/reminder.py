@@ -113,7 +113,7 @@ class ReminderViewSchema(BaseModel):
     name_normalized: str
     description: str
     due_date: datetime
-    email: Optional[str]
+    email: str
     send_email: Optional[bool]
     recurring: Optional[bool]
 

@@ -9,7 +9,7 @@ load_dotenv('../.env')
 
 
 class EmailClient():
-    '''Class representing a email_client'''
+    '''Class representing an email_client'''
     def __init__(
         self,
         name: str,

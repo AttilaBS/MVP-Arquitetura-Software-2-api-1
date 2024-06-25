@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from unidecode import unidecode
 from model import Base
 from model import Email
+from logger import logger
 
 
 class Reminder(Base):
