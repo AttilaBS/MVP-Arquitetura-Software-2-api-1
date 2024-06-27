@@ -38,16 +38,7 @@ class EmailClient():
         message = EmailMessage()
         if flag_create or flag_update:
             term = 'criado' if flag_update is None else 'atualizado'
-            message.set_content(f'''
-                    Olá usuário(a), este é um email automatizado para avisar
-                    que o lembrete nome:  {self.name}, de descrição:
-                    {self.description}, e com data final: {self.due_date},
-                    foi {term}.
-
-                    Atenciosamente,
-                    Aplicativo Lembretes
-                ''')
-            message.add_alternative(f'''\
+            message.set_content(f'''\
             <!DOCTYPE html>
                 <html>
                     <body>
@@ -63,17 +54,17 @@ class EmailClient():
                     </body>
                 </html>
             ''', subtype = 'html')
-        elif flag_due_date:
-            message.set_content(f'''
+            message.add_alternative(f'''
                     Olá usuário(a), este é um email automatizado para avisar
                     que o lembrete nome:  {self.name}, de descrição:
                     {self.description}, e com data final: {self.due_date},
-                    está próximo à data estipulada.
+                    foi {term}.
 
                     Atenciosamente,
                     Aplicativo Lembretes
                 ''')
-            message.add_alternative(f'''\
+        elif flag_due_date:
+            message.set_content(f'''\
             <!DOCTYPE html>
                 <html>
                     <body>
@@ -89,6 +80,15 @@ class EmailClient():
                     </body>
                 </html>
             ''', subtype = 'html')
+            message.add_alternative(f'''
+                    Olá usuário(a), este é um email automatizado para avisar
+                    que o lembrete nome:  {self.name}, de descrição:
+                    {self.description}, e com data final: {self.due_date},
+                    está próximo à data estipulada.
+
+                    Atenciosamente,
+                    Aplicativo Lembretes
+                ''')
         message['From'] = self.email_sender
         message['To'] = self.email_receiver
         message['Subject'] = self.subject

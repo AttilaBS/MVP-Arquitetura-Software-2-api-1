@@ -10,3 +10,4 @@ SQLAlchemy-ImageAttach
 typing_extensions
 Unidecode
 python-dotenv
+requests

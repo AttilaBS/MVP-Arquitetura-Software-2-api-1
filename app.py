@@ -1,7 +1,7 @@
 '''Module responsible for routing'''
 from datetime import datetime
 from flask_openapi3 import OpenAPI, Info, Tag
-from flask import redirect, request
+from flask import redirect
 from unidecode import unidecode
 from sqlalchemy.exc import IntegrityError
 from flask_cors import CORS
@@ -9,6 +9,7 @@ from model import Reminder, Email, EmailClient
 from model import Session
 from logger import logger
 from schemas import *
+import requests
 
 
 info = Info(title = 'Reminder API', version = '1.0.0')
@@ -55,11 +56,10 @@ def create(form: ReminderSchema):
                 'name': reminder.name,
                 'description': reminder.description,
                 'due_date': due_date_adjusted,
-                'receiver': email_receiver
+                'email_receiver': email_receiver
             }
-            logger.debug('before')
-            __email_payload(payload)
-            logger.debug('after')
+            response = __email_payload(payload)
+            logger.debug(f'Response email_payload: {response}')
 
             # email_client.prepare_and_send_email(flag_create = True)
         # After email validation and sending or not, commit changes
@@ -211,13 +211,13 @@ def __email_payload(payload):
         Esta rota envia o payload de email para a api de envio de email.
     '''
     try:
-        logger.debug('chegou no método')
-        response = request.post('http://localhost:5001/prepare', payload)
-        logger.debug(response)
-        return {'mensagem': f'Email avisando do prazo final do lembrete enviado para o destinatário: {email_receiver}'}, 200
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post('http://api2:5000/prepare', json=payload, headers=headers)
+        logger.debug(f'response : {response}')
+        return response
     except Exception as error:
-        logger.warning('Erro ao validar e enviar email para lembrete# %d - erro : %s', reminder.id, error)
-        return {'mensagem': 'Ocorreu um erro ao enviar o email.'}, 404
+        logger.warning('Erro ao validar e enviar email para lembrete#')
+        return {'mensagem': 'Ocorreu um erro ao enviar o email: %s', 'erro': error}, 404
 
 @app.route('/format_error')
 def format_error_response(error_message:str, status:int) -> list:
