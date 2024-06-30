@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 
 from model.base import Base
 from model.email import Email
-from model.email_client import EmailClient
 from model.reminder import Reminder
 
 DB_PATH = 'database/'

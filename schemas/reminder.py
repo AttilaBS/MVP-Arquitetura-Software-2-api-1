@@ -117,14 +117,6 @@ class ReminderViewSchema(BaseModel):
     send_email: Optional[bool]
     recurring: Optional[bool]
 
-
-class EmailSentSchema(BaseModel):
-    '''
-        Define como será a resposta ao enviar um email de lembrete.
-    '''
-    message: str
-    name: str
-
 def show_reminder(reminder: Reminder):
     '''
         Retorna a representação de um lembrete seguindo o esquema definido

@@ -5,7 +5,7 @@ from flask import redirect
 from unidecode import unidecode
 from sqlalchemy.exc import IntegrityError
 from flask_cors import CORS
-from model import Reminder, Email, EmailClient
+from model import Reminder, Email
 from model import Session
 from logger import logger
 from schemas import *
@@ -19,7 +19,6 @@ CORS(app)
 documentation_tag = Tag(name = 'Documentação', description = 'Seleção de documentação: Swagger')
 reminder_tag = Tag(name = 'Lembrete', description = 'Adição, edição, visualização individual ou geral e remoção de lembretes')
 prepare_tag = Tag(name = 'Preparo de payload', description = 'Envia o payload do email à API específica para envio de emails.')
-email_tag = Tag(name = 'Envio de Email', description = 'Envia um email de lembrete caso a data estipulada no lembrete esteja próxima')
 
 @app.get('/', tags = [documentation_tag])
 def documentation():
@@ -47,7 +46,6 @@ def create(form: ReminderSchema):
         reminder.insert_email(Email(form.email))
         session = Session()
         session.add(reminder)
-        logger.debug('Adicionado lembrete de nome: %s', reminder.name)
         session.commit()
         if reminder.validate_email_before_send():
             email_receiver = reminder.email_relationship[0].email
@@ -56,13 +54,11 @@ def create(form: ReminderSchema):
                 'name': reminder.name,
                 'description': reminder.description,
                 'due_date': due_date_adjusted,
-                'email_receiver': email_receiver
+                'email_receiver': email_receiver,
+                'flag': 'create'
             }
-            response = __email_payload(payload)
+            response = __sent_email_payload(payload)
             logger.debug(f'Response email_payload: {response}')
-
-            # email_client.prepare_and_send_email(flag_create = True)
-        # After email validation and sending or not, commit changes
 
         return show_reminder(reminder), 200
 
@@ -148,7 +144,6 @@ def update(form: ReminderUpdateSchema):
     session = Session()
     reminder = session.query(Reminder).filter(Reminder.id == form.id).first()
 
-    logger.debug('Alterando um lembrete de nome: %s', reminder.name)
     try:
         reminder.name = form.name or reminder.name
         reminder.name_normalized = unidecode(form.name.lower())
@@ -158,22 +153,20 @@ def update(form: ReminderUpdateSchema):
         reminder.email_relationship[0].email = form.email
         reminder.recurring = form.recurring
         reminder.updated_at = datetime.now()
-
-        logger.debug('Lembrete atualizado, nome: %s', reminder.name)
+        session.commit()
 
         if reminder.validate_email_before_send():
-            #Sending email if has an email and send_email is True
             email_receiver = reminder.email_relationship[0].email
             due_date_adjusted = reminder.due_date.strftime('%d/%m/%Y')
-            email_client = EmailClient(
-                reminder.name,
-                reminder.description,
-                due_date_adjusted,
-                email_receiver
-                )
-            email_client.prepare_and_send_email(flag_update = True)
-        # After email validation and sending or not, commit changes
-        session.commit()
+            payload = {
+                'name': reminder.name,
+                'description': reminder.description,
+                'due_date': due_date_adjusted,
+                'email_receiver': email_receiver,
+                'flag': 'update'
+            }
+            response = __sent_email_payload(payload)
+            logger.debug(f'Response email_payload: {response.text}')
 
         return show_reminder(reminder), 200
 
@@ -206,7 +199,7 @@ def delete_reminder(query: ReminderSearchSchema):
     logger.debug('Lembrete # %d removido com sucesso.', reminder_id)
     return {'mensagem': 'Lembrete removido', 'nome': reminder.name}
 
-def __email_payload(payload):
+def __sent_email_payload(payload):
     '''
         Esta rota envia o payload de email para a api de envio de email.
     '''
