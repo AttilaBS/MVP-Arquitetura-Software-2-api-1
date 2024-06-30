@@ -1,132 +1,134 @@
-# Lembretes API
+# Lembretes api1
 
-## Vídeo de demonstração das rotas e da aplicação:
-    Link: https://youtu.be/EI1YREB8ulw
+## Vídeo de demonstração da aplicação em funcionamento:
+    Link: <_TODO_>
+
+## Link do fluxograma do projeto:
+    https://www.figma.com/board/QQJ05XsjOiAJMTkwIXN6FQ/Fluxograma-Aplica%C3%A7%C3%A3o-Reminder-Web-2.0?node-id=0-1&t=ULFW6Rmb2CMpkqWs-1
 
 ## Descrição do projeto:
-      Este projeto faz parte das exigências da 1ª sprint da pós graduação 
-    da PUC-Rio, curso Engenharia de Software, turma de julho de 2023.
-    Neste projeto se encontra a API que possui como funcionalidades,
-    além do CRUD básico (Create, Read/Retrieve, Update e Delete),
-    algumas funcionalidades extras como envio de email, por exemplo.
-    Este projeto é um MVP que é complementado pelo front-end que se
-    encontra em outro repositório.
+   Este repositório faz parte das exigências da sprint Arquitetura de Software
+  da pós graduação da PUC-Rio, curso Engenharia de Software, turma de julho de 2023.
+  Neste repositório se encontra a API que funciona como gateway da aplicação e
+  possui como funcionalidades: o CRUD (Create, Read/Retrieve, Update e Delete)
+  de lembretes, além de fazer um relacionamento com a tabela emails, bem como
+  se comunicar com a api2, responsável pelo envio de emails.
 
-      A aplicação tem como objetivo evitar com que compromissos sejam
-    esquecidos, permitindo que o usuário cadastre lembretes que podem ser
-    facilmente criados, recuperados, editados ou removidos.
+   Este repositório possui também o arquivo de orquestração de containers, sendo
+  assim o principal responsável pelo funcionamento da aplicação.
+
+   A aplicação consiste basicamente em permitir que um usuário cadastre
+  lembretes que podem ser facilmente criados, recuperados, editados, removidos
+  e enviados à qualquer email.
 
 ## Árvore de módulos. O sistema de pastas e arquivos do projeto está estruturado:
-    Projeto
+    api1
     |__ database
         |__ db.sqlite3
     |__ log
-        |__ gunicorn.detailed.log
+        |__ detailed.log
+        |__ detailed.log1 ... .log10
     |__ model
         |__ __init__.py
         |__ base.py
-        |__ email_client.py
         |__ email.py
         |__ reminder.py
     |__ schemas
         |__ __init__.py
         |__ error.py
         |__ reminder.py
-    |__ .env (não será commitado por questões de segurança)
+    |__ .gitignore
     |__ app.py
+    |__ docker-compose.yml
+    |__ Dockerfile
     |__ logger.py
+    |__ README.md
     |__ requirements.txt
 
 ## Como executar
-Será necessário ter todas as libs python listadas no requirements.txt instaladas. 
-Após clonar o repositório, é necessário ir ao diretório raiz, pelo terminal, para 
-poder executar os comandos descritos abaixo.
 
-É fortemente indicado o uso de ambientes virtuais do tipo virtualenv.
-
-Passos para o ambiente virtual:
-
-    #1 python3 -m pip install --user pipx
-    #2 pipx install virtualenv
-    #3 mkdir <diretorio_ambiente_virtual>
-    #4 source <diretorio_ambiente_virtual>/bin/activate
-
-Em qualquer dos cenários (ambiente virtual ou não), no diretório raiz da
-aplicação instalar os requerimentos com:
- 
- pip install -r requirements.txt
-
-Para executar a API, executar:
-$ flask run --host 0.0.0.0 --port 5000 --reload
-
-Abra o http://localhost:5000/#/ no navegador para verificar o status da API em execução.
+    #1 git clone git@github.com:AttilaBS/MVP-Arquitetura-Software-1-front.git
+    #2 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-2-api-1
+    #3 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-3-api-2
+    #4 na pasta raiz deste repositório, digitar docker compose up --build
+     Obs.: Pode ser necessário executar o comando com sudo
+    #5 aguardar o final do build dos containers
+    #6 criar um arquivo .env na raiz da aplicação api2 e preencher as informações
+     passadas via mensagem no momento de postagem deste MVP.
+    #6 acessar o frontend pela url: http://localhost:3000
 
 ## Responsabilidades dos arquivos do projeto
 
 ## Pasta database:
   ### db.sqlite3
-        Arquivo onde as operações no projeto são persistidas usando o banco
-    de dados relacional SQLite.
+   Arquivo onde as operações no projeto são persistidas usando o banco
+  de dados relacional SQLite.
 
+## Pasta log:
   ### detailed.log
-        Arquivo de log principal da aplicação, é um arquivo de texto 
-    responsável por armazenar informações de debug, erros e também sucesso.
+   Arquivo de log principal da aplicação, é um arquivo de texto
+  responsável por armazenar informações de debug, erros e também sucesso
+  mais genéricas.
+
+  ### detailed.log1 ... .log10
+   Arquivos de log com mais detalhes, com trace mais completo. Importantes
+  para debug mais aprofundado.
 
 ## Pasta model:
   ### \_\_init\_\_.py
-      Responsável por inicializar o banco de dados e também por criá-lo na
-    primeira execução do projeto.
+   Responsável por importar a lib de banco de dados, inicializá-lo,
+  também por criá-lo na primeira execução do projeto e importar os demais
+  models da aplicação.
 
   ### base.py
-      Relacionado ao módulo SQLAlchemy, permite que operações no banco a
-    partir de outras classes que não a base, sejam realizadas.
-
-  ### email_client.py
-      Responsável por enviar emails com as informações do lembrete.
-    Atualmente, um email é enviado de forma automática quando o lembrete
-    é criado e também quando o lembrete é editado / atualizado, caso o 
-    usuário opte por isso.
-      Também é possível enviar emails manualmente pela rota /send_email caso
-    alguns requisitos sejam preenchidos. 
+   Importa e inicializa a classe base que será usada nas operações no banco
+  de dados.
 
   ### email.py
-      Responsável pela relação com a classe Reminder. Esta classe permite
-    atribuir um email a um lembrete.
+   Responsável pela relação com a classe Reminder. Esta classe permite
+  atribuir um email a um lembrete.
 
   ### reminder.py
-      Model principal da aplicação. Responsável pela lógica de instanciar
-    um modelo do tipo reminder. Também é responsável pela validação
-    das regras de envio de um email de lembrete. 
+   Model principal da aplicação. Responsável pela lógica referente aos
+  models do tipo reminder.
 
 ## Pasta schemas:
   ### \_\_init\_\_.py
-      Responsável por importar os schemas para a aplicação.
+   Responsável por importar os schemas para a aplicação.
 
   ### error.py
-      Responsável por definir o padrão das respostas de erro da aplicação.
+   Responsável por definir o padrão das respostas de erro da aplicação.
 
   ### reminder.py
-      Responsável por definir os padrões das respostas das rotas da aplicação,
-    bem como validar o tipo de informação passada nas requisições.
+   Responsável por definir os padrões das respostas das rotas da aplicação,
+  bem como validar o tipo de informação passada nas requisições.
 
 ## Pasta raiz da aplicação:
-  ### .env
-      Responsável pelas variáveis de ambiente do projeto. Por usualmente
-    possuir informações sensíveis , não deve ser enviado para o 
-    repositório.
+  ### .gitignore
+   Responsável por adicionar arquivos e pastas que serão ignorados
+  pelo sistema de versionamento do repositório.
 
   ### app.py
-      Controlador da aplicação. Possui todas as rotas e lógica respectiva.
+   Controlador da aplicação. Possui todas as rotas e lógica respectiva
+  deste repositório, bem como responsável pelas rotas de comunicação
+  com os demais serviços.
+
+  ### docker-compose.yml
+   Arquivo de orquestração de containers do docker. Responsável pela comunicação
+  entre os serviços da aplicação, bem como funcionamento deles.
+
+  ### Dockerfile
+   Arquivo de configuração docker, específico para o serviço api1.
 
   ### logger.py
-      Responsável pela configuração de logs da aplicação. Neste arquivo
-    é possível customizar diversas opções de log, como o nível de disparo 
-    de log, formatação dos logs e etc.
+   Responsável pela configuração de logs da aplicação. Neste arquivo
+  é possível customizar diversas opções de log, como o nível de disparo
+  de log, formatação dos logs e etc.
 
   ### README.md
-      Este arquivo. Responsável por descrever a aplicação, seus objetivos
-    e instruções para execução.
+   Este arquivo. Responsável por descrever a aplicação, seus objetivos
+  e instruções para execução.
 
   ### requirements.txt
-      Possui as bibliotecas / módulos necessários para a execução correta
-      da aplicação.
+   Possui as bibliotecas / módulos necessários para a execução correta
+  da aplicação.
