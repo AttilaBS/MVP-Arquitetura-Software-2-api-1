@@ -37,7 +37,8 @@ services:
     ports:
       - "3000:80"
     volumes:
-      - ..:/frontend
+      - ../frontend:/usr/share/nginx/html
+      - ../frontend/nginx/nginx.conf:/etc/nginx/nginx.conf
     container_name: mvp_frontend
     depends_on:
       - api1
