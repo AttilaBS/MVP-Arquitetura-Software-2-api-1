@@ -50,7 +50,8 @@
     #1 git clone git@github.com:AttilaBS/MVP-Arquitetura-Software-1-front.git
     #2 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-2-api-1
     #3 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-3-api-2
-    #4 na pasta raiz deste repositório, digitar docker compose up --build
+    #4 na pasta raiz do repositório presente (api1), se encontra o docker-compose. Digitar:
+    docker compose up --build
      Obs.: Pode ser necessário executar o comando com sudo
     #5 aguardar o final do build dos containers
     #6 criar um arquivo .env na raiz da aplicação api2 e preencher as informações
@@ -70,7 +71,7 @@
   responsável por armazenar informações de debug, erros e também sucesso
   mais genéricas.
 
-  ### detailed.log1 ... .log10
+  ### detailed.log1 ... .log5
    Arquivos de log com mais detalhes, com trace mais completo. Importantes
   para debug mais aprofundado.
 
@@ -132,3 +133,13 @@
   ### requirements.txt
    Possui as bibliotecas / módulos necessários para a execução correta
   da aplicação.
+
+  ### Sobre a API externa consumida
+   A API externa consumida é da Google, com a funcionalidade de envio de
+  emails. Para que funcione corretamente, é necessário criar e preencher
+  o arquivo .env na raiz deste repositório com as informações que serão
+  colocadas no momento de postagem deste MVP.
+
+  A rota que acessa a API externa (por meio do serviço api2), é:
+  __sent_email_payload(payload), chamada nas rotas de criação e atualização
+  de lembretes, quando o usuário opta pelo envio de email (opção enviar email).
