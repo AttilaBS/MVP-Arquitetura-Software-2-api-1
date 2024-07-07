@@ -19,7 +19,6 @@ class ReminderSchema(BaseModel):
     send_email: Optional[bool] = False
     email: str
     recurring: Optional[bool] = False
-
     @validator('name', allow_reuse = True)
     def validator_name(cls, parameter):
         '''Validator for name'''
@@ -28,21 +27,18 @@ class ReminderSchema(BaseModel):
         if re.search('[0-9]', parameter):
             raise ValueError('O nome do lembrete não pode conter números')
         return parameter
-
     @validator('description', allow_reuse = True)
     def validator_description(cls, parameter):
         '''Validator for description'''
         if not len(parameter) > 0:
             raise ValueError('A descrição não pode ser vazia!')
         return parameter
-
     @validator('email', allow_reuse = True, check_fields=False)
     def validator_email(cls, parameter):
         '''Validator for email'''
         if not len(parameter) > 0:
             raise ValueError('O email não pode ser vazio!')
         return parameter
-
 
 class ReminderUpdateSchema(BaseModel):
     '''
@@ -77,9 +73,10 @@ class ReminderUpdateSchema(BaseModel):
 
 class ReminderSearchSchema(BaseModel):
     '''
-        Define como será a busca de lembrete apenas pelo id.
+        Define como será a busca de lembrete pelo id.
     '''
     id: int
+    username: str
 
 
 class ReminderSearchByNameSchema(BaseModel):

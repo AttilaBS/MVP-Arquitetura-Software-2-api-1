@@ -40,15 +40,15 @@ dictConfig({
             "filename": "log/error.log",
             "maxBytes": 100000,
             "backupCount": 10,
-            "delay": "True",
+            "delay": "False",
         },
         "detailed_file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "detailed",
             "filename": "log/detailed.log",
             "maxBytes": 100000,
-            "backupCount": 10,
-            "delay": "True",
+            "backupCount": 5,
+            "delay": "False",
         }
     },
     "loggers": {

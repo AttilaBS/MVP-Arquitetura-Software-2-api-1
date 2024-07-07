@@ -4,4 +4,5 @@ from schemas.reminder import ReminderSchema, ReminderUpdateSchema, \
                             ReminderViewSchema, RemindersListSchema, \
                             ReminderSearchByNameSchema, \
                                 show_reminder, show_reminders
+from schemas.user import UserSchema
 from schemas.error import ErrorSchema

@@ -7,12 +7,12 @@ from model import Base
 
 class Email(Base):
     '''Class representing an email'''
-    __tablename__ = 'email'
+    __tablename__ = 'emails'
 
     id = Column(Integer, primary_key = True)
     email = Column(String(60))
     #relation
-    reminder = Column(Integer, ForeignKey('reminder.pk_reminder'), nullable = False)
+    reminder = Column(Integer, ForeignKey('reminders.pk_reminder'), nullable = False)
     created_at = Column(DateTime, default = datetime.now())
     updated_at = Column(DateTime, default = None)
 

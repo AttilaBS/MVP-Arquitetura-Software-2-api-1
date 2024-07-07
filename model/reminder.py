@@ -1,17 +1,17 @@
 '''Module responsible for reminder model'''
 from typing import Union
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from unidecode import unidecode
 from model import Base
 from model import Email
-
+from model import User
+from logger import logger
 
 class Reminder(Base):
     '''Class representing a reminder'''
-    __tablename__ = 'reminder'
-
+    __tablename__ = 'reminders'
     id = Column('pk_reminder', Integer, primary_key = True)
     name = Column(String(60), unique = True)
     name_normalized = Column(String(140))
@@ -19,15 +19,16 @@ class Reminder(Base):
     due_date = Column(DateTime)
     send_email = Column(Boolean, unique = False, default = False)
     recurring = Column(Boolean, unique = False, default = False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable = False)
     created_at = Column(DateTime, default = datetime.now())
     updated_at = Column(DateTime, default = None)
     # relationship with table email
     email_relationship = relationship('Email')
-
     def __init__(
         self,
         name: str,
         description: str,
+        user_id: int,
         due_date: Union[DateTime, None] = None,
         send_email: bool = False,
         recurring: bool = False,
@@ -36,6 +37,7 @@ class Reminder(Base):
         self.name = name
         self.name_normalized = unidecode(name.lower())
         self.description = description
+        self.user_id = user_id
         self.due_date = due_date
         self.send_email = send_email
         self.recurring = recurring

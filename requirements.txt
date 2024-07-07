@@ -11,3 +11,5 @@ typing_extensions
 Unidecode
 python-dotenv
 requests
+bcrypt
+flask_httpauth
