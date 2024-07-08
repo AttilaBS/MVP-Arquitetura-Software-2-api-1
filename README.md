@@ -11,15 +11,18 @@
   da pós graduação da PUC-Rio, curso Engenharia de Software, turma de julho de 2023.
   Neste repositório se encontra a API que funciona como gateway da aplicação e
   possui como funcionalidades: o CRUD (Create, Read/Retrieve, Update e Delete)
-  de lembretes, além de fazer um relacionamento com a tabela emails, bem como
-  se comunicar com a api2, responsável pelo envio de emails.
+  de lembretes, criação de usuário usando bcrypt para armazenar a senha, validação
+  de username e senha de usuário, além de relacionamento com a tabela emails,
+  bem como se comunicar com a api2, responsável pelo envio de emails, atuando assim
+  como gateway da aplicação (são mais de 12 rotas).
 
-   Este repositório possui também o arquivo de orquestração de containers, sendo
-  assim o principal responsável pelo funcionamento da aplicação.
+   Este repositório possui também o arquivo de orquestração de containers.
 
    A aplicação consiste basicamente em permitir que um usuário cadastre
   lembretes que podem ser facilmente criados, recuperados, editados, removidos
   e enviados à qualquer email.
+
+  As linguagens usadas são Python 3.x, SqLite.
 
 ## Árvore de módulos. O sistema de pastas e arquivos do projeto está estruturado:
     api1
@@ -27,16 +30,18 @@
         |__ db.sqlite3
     |__ log
         |__ detailed.log
-        |__ detailed.log1 ... .log10
+        |__ detailed.log1 ... .log5
     |__ model
         |__ __init__.py
         |__ base.py
         |__ email.py
         |__ reminder.py
+        |__ user.py
     |__ schemas
         |__ __init__.py
         |__ error.py
         |__ reminder.py
+        |__ user.py
     |__ .gitignore
     |__ app.py
     |__ docker-compose.yml
@@ -50,6 +55,11 @@
     #1 git clone git@github.com:AttilaBS/MVP-Arquitetura-Software-1-front.git
     #2 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-2-api-1
     #3 git clone https://github.com/AttilaBS/MVP-Arquitetura-Software-3-api-2
+      OBS.:Os repositórios devem estar na seguinte hierarquia de pastas:
+      Pasta-raiz
+          |__ frontend
+          |__ api1
+          |__ api2
     #4 na pasta raiz do repositório presente (api1), se encontra o docker-compose. Digitar:
     docker compose up --build
      Obs.: Pode ser necessário executar o comando com sudo
@@ -58,7 +68,7 @@
      passadas via mensagem no momento de postagem deste MVP.
     #6 acessar o frontend pela url: http://localhost:3000
 
-## Responsabilidades dos arquivos do projeto
+## Responsabilidades dos arquivos do componente
 
 ## Pasta database:
   ### db.sqlite3
@@ -73,7 +83,7 @@
 
   ### detailed.log1 ... .log5
    Arquivos de log com mais detalhes, com trace mais completo. Importantes
-  para debug mais aprofundado.
+  para debug mais aprofundado ou então backup dos logs.
 
 ## Pasta model:
   ### \_\_init\_\_.py
@@ -93,6 +103,10 @@
    Model principal da aplicação. Responsável pela lógica referente aos
   models do tipo reminder.
 
+  ### user.py
+   Responsável pela criação e validação dos usuários criados na aplicação para
+  acesso das rotas protegidas.
+
 ## Pasta schemas:
   ### \_\_init\_\_.py
    Responsável por importar os schemas para a aplicação.
@@ -103,6 +117,10 @@
   ### reminder.py
    Responsável por definir os padrões das respostas das rotas da aplicação,
   bem como validar o tipo de informação passada nas requisições.
+
+  ### user.py
+   Responsável por definir os padrões de requisições e respostas das rotas
+  relativas à criação e validação de usuários.
 
 ## Pasta raiz da aplicação:
   ### .gitignore
@@ -134,7 +152,7 @@
    Possui as bibliotecas / módulos necessários para a execução correta
   da aplicação.
 
-  ### Sobre a API externa consumida
+  ### Sobre a API externa consumida e envio de emails pela aplicação
    A API externa consumida é da Google, com a funcionalidade de envio de
   emails. Para que funcione corretamente, é necessário criar e preencher
   o arquivo .env na raiz deste repositório com as informações que serão
