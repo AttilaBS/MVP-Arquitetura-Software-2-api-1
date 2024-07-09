@@ -125,6 +125,8 @@ def auth_error():
 def create(form: ReminderSchema, query: ReminderCreateOrUpdateSchema):
     '''
         Persiste um novo lembrete no banco de dados.
+        Se for inserido um email válido e a flag send_email como True,
+        enviará um email com os dados do lembrete.
     '''
     if request.args.get('username'):
         username = request.args.get('username')
@@ -154,8 +156,7 @@ def create(form: ReminderSchema, query: ReminderCreateOrUpdateSchema):
                 'email_receiver': email_receiver,
                 'flag': 'create'
             }
-            response = __sent_email_payload(payload)
-            logger.debug(f'Response email_payload: {response}')
+            __sent_email_payload(payload)
 
         return show_reminder(reminder), 200
 
@@ -259,7 +260,8 @@ def get_all_reminders(query: RemindersSearchSchema):
 @auth.login_required
 def update(form: ReminderUpdateSchema, query: ReminderCreateOrUpdateSchema):
     '''
-        Atualiza um lembrete pelo id.
+        Atualiza um lembrete pelo id. Se for inserido um email válido e a flag
+        send_email como True, enviará um email com os dados do lembrete.
     '''
     session = Session()
     if request.args.get('username'):
@@ -293,8 +295,7 @@ def update(form: ReminderUpdateSchema, query: ReminderCreateOrUpdateSchema):
                 'email_receiver': email_receiver,
                 'flag': 'update'
             }
-            response = __sent_email_payload(payload)
-            logger.debug(f'Response email_payload: {response.text}')
+            __sent_email_payload(payload)
 
         return show_reminder(reminder), 200
 
@@ -332,24 +333,21 @@ def delete_reminder(query: ReminderSearchSchema):
     logger.debug('Lembrete # %d removido com sucesso.', reminder_id)
     return {'mensagem': 'Lembrete removido', 'nome': reminder.name}
 
-@app.post('/prepare', tags = [send_email_tag])
-def __sent_email_payload(form: SendEmailSchema):
+
+def __sent_email_payload(body: SendEmailSchema):
     '''
         Esta rota envia o payload de email para a api de envio de email.
     '''
-    payload = {
-        'name': form.name,
-        'description': form.description,
-        'due_date': form.due_date,
-        'email_receiver': form.email_receiver,
-        'flag': form.flag
-    }
     try:
         headers = {'Content-Type': 'application/json'}
-        response = requests.post('http://api2:5000/prepare', json=payload, headers=headers)
+        response = requests.post('http://api2:5000/prepare', json=body, headers=headers)
+        response.raise_for_status()
+
         return response
+    except requests.exceptions.RequestException as e:
+        return {'message': e}, 500
     except Exception as error:
-        logger.warning('Erro ao validar e enviar email para lembrete#')
+        logger.error(f'Erro ao validar e enviar email para lembrete: {error}')
         return {'mensagem': 'Ocorreu um erro ao enviar o email: %s', 'erro': error}, 404
 
 def format_error_response(error_message:str, status:int) -> list:

@@ -17,7 +17,7 @@ class ReminderSchema(BaseModel):
     description: str = 'trocar o óleo a cada 10 mil km no Moraes AutoCenter'
     due_date: str = '2023-09-20T00:00:00.000Z'
     send_email: Optional[bool] = False
-    email: str
+    email: str = 'emailexemplo@email.com'
     recurring: Optional[bool] = False
 
     @validator('name', allow_reuse = True)
