@@ -161,7 +161,7 @@
   ### Sobre a API externa consumida e envio de emails pela aplicação
    A API externa consumida é da Google, com a funcionalidade de envio de
   emails. Para que funcione corretamente, é necessário criar e preencher
-  o arquivo .env na raiz deste repositório com as informações que serão
+  o arquivo .env na raiz do repositório da api2 com as informações que serão
   colocadas no momento de postagem deste MVP.
 
   A rota que acessa a API externa (por meio do serviço api2), é:
