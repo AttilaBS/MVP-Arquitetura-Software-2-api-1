@@ -1,7 +1,7 @@
 # Lembretes api1
 
 ## Vídeo de demonstração da aplicação em funcionamento:
-    Link: <_TODO_>
+    https://youtu.be/yPVw6CfYXRI
 
 ## Link do fluxograma do projeto:
     https://www.figma.com/board/QQJ05XsjOiAJMTkwIXN6FQ/Fluxograma-Aplica%C3%A7%C3%A3o-Reminder-Web-2.0?node-id=0-1&t=ULFW6Rmb2CMpkqWs-1
