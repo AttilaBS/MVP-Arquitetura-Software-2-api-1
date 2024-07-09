@@ -16,7 +16,8 @@
   bem como se comunicar com a api2, responsável pelo envio de emails, atuando assim
   como gateway da aplicação (são mais de 12 rotas).
 
-   Este repositório possui também o arquivo de orquestração de containers.
+   Este repositório possui também o arquivo de orquestração de containers, sendo
+  assim o componente principal do sistema.
 
    A aplicação consiste basicamente em permitir que um usuário cadastre
   lembretes que podem ser facilmente criados, recuperados, editados, removidos
@@ -42,6 +43,7 @@
         |__ error.py
         |__ reminder.py
         |__ user.py
+        |__ send_email.py
     |__ .gitignore
     |__ app.py
     |__ docker-compose.yml
@@ -60,13 +62,13 @@
           |__ frontend
           |__ api1
           |__ api2
-    #4 na pasta raiz do repositório presente (api1), se encontra o docker-compose. Digitar:
-    docker compose up --build
+    #4 na pasta raiz do repositório presente (api1), se encontra o docker-compose.
+    Digitar: docker compose up --build
      Obs.: Pode ser necessário executar o comando com sudo
     #5 aguardar o final do build dos containers
     #6 criar um arquivo .env na raiz da aplicação api2 e preencher as informações
      passadas via mensagem no momento de postagem deste MVP.
-    #6 acessar o frontend pela url: http://localhost:3000
+    #7 acessar o frontend pela url: http://localhost:3000
 
 ## Responsabilidades dos arquivos do componente
 
@@ -122,6 +124,10 @@
    Responsável por definir os padrões de requisições e respostas das rotas
   relativas à criação e validação de usuários.
 
+  ### send_email.py
+   Responsável por definir os padrões de requisições e respostas das rotas
+  relativas ao envio de emails.
+
 ## Pasta raiz da aplicação:
   ### .gitignore
    Responsável por adicionar arquivos e pastas que serão ignorados
@@ -161,3 +167,8 @@
   A rota que acessa a API externa (por meio do serviço api2), é:
   __sent_email_payload(payload), chamada nas rotas de criação e atualização
   de lembretes, quando o usuário opta pelo envio de email (opção enviar email).
+
+  ### Teste das rotas das apis.
+   Todas as rotas principais das APIs podem ser testadas via frontend, mas é
+  possível também testar as rotas das APIs via Swagger ou similares, por meio
+  da url: 'http://localhost:5000'.
