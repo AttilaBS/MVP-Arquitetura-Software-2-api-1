@@ -19,6 +19,7 @@ class ReminderSchema(BaseModel):
     send_email: Optional[bool] = False
     email: str
     recurring: Optional[bool] = False
+
     @validator('name', allow_reuse = True)
     def validator_name(cls, parameter):
         '''Validator for name'''
@@ -84,6 +85,7 @@ class ReminderSearchByNameSchema(BaseModel):
         Define como será a busca de lembrete apenas pelo nome.
     '''
     name: str
+    username: str
 
 
 class ReminderDeleteSchema(BaseModel):
@@ -113,6 +115,7 @@ class ReminderViewSchema(BaseModel):
     email: str
     send_email: Optional[bool]
     recurring: Optional[bool]
+    user_id: int
 
 def show_reminder(reminder: Reminder):
     '''
@@ -127,7 +130,8 @@ def show_reminder(reminder: Reminder):
         'due_date': reminder.due_date,
         'send_email': reminder.send_email,
         'email': reminder.email_relationship[0].email,
-        'recurring': reminder.recurring
+        'recurring': reminder.recurring,
+        'user_id': reminder.user_id
     }
 
 def show_reminders(reminders: List[Reminder]):
@@ -145,6 +149,21 @@ def show_reminders(reminders: List[Reminder]):
             'due_date': reminder.due_date,
             'send_email': reminder.send_email,
             'email': reminder.email_relationship[0].email,
-            'recurring': reminder.recurring
+            'recurring': reminder.recurring,
+            'user_id': reminder.user_id
         })
     return {'reminders': result}
+
+
+class RemindersSearchSchema(BaseModel):
+    '''
+        Define como será a busca de todos os lembretes de um usuário logado.
+    '''
+    username: str
+
+
+class ReminderCreateOrUpdateSchema(BaseModel):
+    '''
+        Define o parâmetro para permitir a criação ou atualização de lembrete.
+    '''
+    username: str

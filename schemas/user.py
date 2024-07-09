@@ -29,3 +29,24 @@ class UserSchema(BaseModel):
         if not len(parameter.strip()) > 3:
             raise ValueError('A senha precisa ter no mínimo 4 caracteres!')
         return parameter
+
+
+class UserViewSchema(BaseModel):
+    '''
+        Define como será a visualização do model de um user.
+    '''
+    username: str
+
+class UserWithIdViewSchema(BaseModel):
+    '''
+        Define como será a visualização do model de um user retornado com id.
+    '''
+    username: str
+    user_id: int
+
+
+class UserSearchSchema(BaseModel):
+    '''
+        Define como será a busca de um user pelo username.
+    '''
+    username: str

@@ -32,7 +32,10 @@ def documentation():
     '''
     return redirect('/openapi')
 
-@app.post('/user/create', tags = [user_tag])
+
+@app.post('/user/create', tags = [user_tag],
+          responses = {'200': UserViewSchema,
+                     '400': ErrorSchema})
 def new_user(form: UserSchema):
     '''
         Cria um novo usuário na aplicação.
@@ -54,7 +57,10 @@ def new_user(form: UserSchema):
 
     return { 'username': user.username }, 201
 
-@app.post('/user/validate', tags = [user_tag])
+
+@app.post('/user/validate', tags = [user_tag],
+          responses = {'200': UserViewSchema,
+                     '400': ErrorSchema})
 def validate_user(form: UserSchema):
     '''
         Faz a validação do username e do hash da senha, salvos na aplicação.
@@ -70,15 +76,17 @@ def validate_user(form: UserSchema):
     return format_error_response(error_msg, 400)
 
 
-@app.get('/user/get/<string:username>', tags = [user_tag])
-def get_user(user_name=''):
+@app.get('/user/get/', tags = [user_tag],
+         responses = {'200': UserWithIdViewSchema,
+                     '400': ErrorSchema})
+def get_user(query: UserSearchSchema):
     '''
         Retorna o username e o id do usuário.
     '''
-    if not user_name == '':
-        username = user_name
-    else:
+    if request.args.get('username'):
         username = request.args.get('username')
+    else:
+        username = query.username
     session = Session()
     user = session.query(User).filter(User.username == username).first()
     if not user:
@@ -114,11 +122,15 @@ def auth_error():
                      '409': ErrorSchema,
                      '400': ErrorSchema})
 @auth.login_required
-def create(form: ReminderSchema):
+def create(form: ReminderSchema, query: ReminderCreateOrUpdateSchema):
     '''
         Persiste um novo lembrete no banco de dados.
     '''
-    user = get_user(request.args.get('username'))
+    if request.args.get('username'):
+        username = request.args.get('username')
+    else:
+        username = query.username
+    user = get_user(username)
     reminder = Reminder(
         name = form.name,
         description = form.description,
@@ -165,15 +177,21 @@ def create(form: ReminderSchema):
 @auth.login_required
 def get_reminder(query: ReminderSearchSchema):
     '''
-        Retorna o lembrete buscado pelo id.
+        Retorna o lembrete buscado pelo id e username.
     '''
     reminder_id = query.id
-    user = get_user(request.args.get('username'))
+    if request.args.get('username'):
+        username = request.args.get('username')
+    else:
+        username = query.username
+    user = get_user(username)
     logger.info('Coletando dados sobre o lembrete # %s', reminder_id)
-
     try:
         session = Session()
-        reminder = session.query(Reminder).filter(Reminder.id == reminder_id).filter(User.id == user['user_id']).first()
+        reminder = session.query(Reminder).filter(
+                Reminder.id == reminder_id,
+                Reminder.user_id == user['user_id']
+            ).first()
         logger.info('reminder: %s', reminder.name)
     except Exception as error:
         error_msg = 'O lembrete buscado não existe.'
@@ -193,15 +211,22 @@ def get_reminder_name(query: ReminderSearchByNameSchema):
         Retorna o lembrete buscado pelo nome.
     '''
     reminder_name = query.name
-    user = get_user(request.args.get('username'))
+    if request.args.get('username'):
+        username = request.args.get('username')
+    else:
+        username = query.username
+    user = get_user(username)
     logger.info('Coletando dados sobre o lembrete # %s', reminder_name)
 
     session = Session()
     name_normalized = unidecode(reminder_name.lower())
-    reminder = session.query(Reminder).filter(Reminder.name_normalized == name_normalized).filter(User.id == user['user_id']).first()
+    reminder = session.query(Reminder).filter(
+            Reminder.name_normalized == name_normalized,
+            Reminder.user_id == user['user_id']
+        ).first()
 
-    error_msg = 'O lembrete buscado não existe.'
     if not reminder:
+        error_msg = 'O lembrete buscado não existe.'
         logger.warning('Erro ao buscar lembrete %s - %s', reminder_name, error_msg)
         return format_error_response(error_msg, 404)
 
@@ -211,13 +236,16 @@ def get_reminder_name(query: ReminderSearchByNameSchema):
 @app.get('/reminders', tags = [reminder_tag],
          responses = {'200': RemindersListSchema, '404': ErrorSchema})
 @auth.login_required
-def get_all_reminders():
+def get_all_reminders(query: RemindersSearchSchema):
     '''
-        Retorna todos os lembretes salvos no banco de dados.
+        Retorna todos os lembretes salvos no banco de dados de usuário específico.
     '''
-    logger.debug('Retornando todos os lembretes')
+    if request.args.get('username'):
+        username = request.args.get('username')
+    else:
+        username = query.username
     session = Session()
-    user = get_user(request.args.get('username'))
+    user = get_user(username)
     reminders = session.query(Reminder).filter(Reminder.user_id == user['user_id']).all()
 
     if not reminders:
@@ -229,14 +257,21 @@ def get_all_reminders():
 @app.put('/update', tags = [reminder_tag],
          responses = {'200': ReminderViewSchema, '404': ErrorSchema})
 @auth.login_required
-def update(form: ReminderUpdateSchema):
+def update(form: ReminderUpdateSchema, query: ReminderCreateOrUpdateSchema):
     '''
         Atualiza um lembrete pelo id.
     '''
     session = Session()
-    user = get_user(request.args.get('username'))
-    reminder = session.query(Reminder).filter(Reminder.id == form.id).filter(Reminder.user_id == user['user_id']).first()
-
+    if request.args.get('username'):
+        username = request.args.get('username')
+    else:
+        username = query.username
+    session = Session()
+    user = get_user(username)
+    reminder = session.query(Reminder).filter(
+            Reminder.id == form.id,
+            Reminder.user_id == user['user_id']
+        ).first()
     try:
         reminder.name = form.name or reminder.name
         reminder.name_normalized = unidecode(form.name.lower())
@@ -282,7 +317,10 @@ def delete_reminder(query: ReminderSearchSchema):
     session = Session()
     try:
         session.query(Email).filter(Email.reminder == reminder_id).delete()
-        reminder_query = session.query(Reminder).filter(Reminder.id == reminder_id).filter(Reminder.user_id == user['user_id'])
+        reminder_query = session.query(Reminder).filter(
+                Reminder.id == reminder_id,
+                Reminder.user_id == user['user_id']
+            )
         reminder = reminder_query.first()
         reminder_query.delete()
         session.commit()
@@ -295,10 +333,17 @@ def delete_reminder(query: ReminderSearchSchema):
     return {'mensagem': 'Lembrete removido', 'nome': reminder.name}
 
 @app.post('/prepare', tags = [send_email_tag])
-def __sent_email_payload(payload):
+def __sent_email_payload(form: SendEmailSchema):
     '''
         Esta rota envia o payload de email para a api de envio de email.
     '''
+    payload = {
+        'name': form.name,
+        'description': form.description,
+        'due_date': form.due_date,
+        'email_receiver': form.email_receiver,
+        'flag': form.flag
+    }
     try:
         headers = {'Content-Type': 'application/json'}
         response = requests.post('http://api2:5000/prepare', json=payload, headers=headers)
