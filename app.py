@@ -21,7 +21,8 @@ auth = HTTPBasicAuth()
 documentation_tag = Tag(name = 'Documentação', description = 'Seleção de documentação: Swagger')
 reminder_tag = Tag(name = 'Lembrete', description = 'Adição, edição, visualização individual ou geral e remoção de lembretes')
 prepare_tag = Tag(name = 'Preparo de payload', description = 'Envia o payload do email à API específica para envio de emails.')
-user_tag = Tag(name = 'Usuário', description = 'Rota de usuário.')
+user_tag = Tag(name = 'Usuário', description = 'Adição, validação e busca de usuário.')
+send_email_tag = Tag(name = 'Envio de email', description = 'Rota de envio de email.')
 
 
 @app.get('/', tags = [documentation_tag])
@@ -69,7 +70,7 @@ def validate_user(form: UserSchema):
     return format_error_response(error_msg, 400)
 
 
-@app.get('/user/get')
+@app.get('/user/get/<string:username>', tags = [user_tag])
 def get_user(user_name=''):
     '''
         Retorna o username e o id do usuário.
@@ -167,11 +168,12 @@ def get_reminder(query: ReminderSearchSchema):
         Retorna o lembrete buscado pelo id.
     '''
     reminder_id = query.id
+    user = get_user(request.args.get('username'))
     logger.info('Coletando dados sobre o lembrete # %s', reminder_id)
 
     try:
         session = Session()
-        reminder = session.query(Reminder).filter(Reminder.id == reminder_id).first()
+        reminder = session.query(Reminder).filter(Reminder.id == reminder_id).filter(User.id == user['user_id']).first()
         logger.info('reminder: %s', reminder.name)
     except Exception as error:
         error_msg = 'O lembrete buscado não existe.'
@@ -191,11 +193,12 @@ def get_reminder_name(query: ReminderSearchByNameSchema):
         Retorna o lembrete buscado pelo nome.
     '''
     reminder_name = query.name
+    user = get_user(request.args.get('username'))
     logger.info('Coletando dados sobre o lembrete # %s', reminder_name)
 
     session = Session()
     name_normalized = unidecode(reminder_name.lower())
-    reminder = session.query(Reminder).filter(Reminder.name_normalized == name_normalized).first()
+    reminder = session.query(Reminder).filter(Reminder.name_normalized == name_normalized).filter(User.id == user['user_id']).first()
 
     error_msg = 'O lembrete buscado não existe.'
     if not reminder:
@@ -214,8 +217,7 @@ def get_all_reminders():
     '''
     logger.debug('Retornando todos os lembretes')
     session = Session()
-    username = request.args.get('username')
-    user = get_user(username)
+    user = get_user(request.args.get('username'))
     reminders = session.query(Reminder).filter(Reminder.user_id == user['user_id']).all()
 
     if not reminders:
@@ -232,7 +234,8 @@ def update(form: ReminderUpdateSchema):
         Atualiza um lembrete pelo id.
     '''
     session = Session()
-    reminder = session.query(Reminder).filter(Reminder.id == form.id).first()
+    user = get_user(request.args.get('username'))
+    reminder = session.query(Reminder).filter(Reminder.id == form.id).filter(Reminder.user_id == user['user_id']).first()
 
     try:
         reminder.name = form.name or reminder.name
@@ -273,8 +276,7 @@ def delete_reminder(query: ReminderSearchSchema):
         Remove um lembrete pelo id.
     '''
     reminder_id = query.id
-    username = query.username
-    user = get_user(username)
+    user = get_user(request.args.get('username'))
     logger.debug('Deletando dados do lembrete # %d', reminder_id)
 
     session = Session()
@@ -292,6 +294,7 @@ def delete_reminder(query: ReminderSearchSchema):
     logger.debug('Lembrete # %d removido com sucesso.', reminder_id)
     return {'mensagem': 'Lembrete removido', 'nome': reminder.name}
 
+@app.post('/prepare', tags = [send_email_tag])
 def __sent_email_payload(payload):
     '''
         Esta rota envia o payload de email para a api de envio de email.
@@ -304,7 +307,6 @@ def __sent_email_payload(payload):
         logger.warning('Erro ao validar e enviar email para lembrete#')
         return {'mensagem': 'Ocorreu um erro ao enviar o email: %s', 'erro': error}, 404
 
-@app.route('/format_error')
 def format_error_response(error_message:str, status:int) -> list:
     response = [
         {

@@ -5,14 +5,13 @@
 from pydantic import BaseModel, validator
 from model.user import User
 import re
-from logger import logger
 
 
 class UserSchema(BaseModel):
     '''
-        Define como a requisição de um novo usuário a ser criado deve ser.
+        Define os parâmetros para criação de um usuário.
     '''
-    username: str = 'Usuário'
+    username: str = 'Usuário Novo'
     password: str = 'a1c2d'
     
     @validator('username', allow_reuse = True)
