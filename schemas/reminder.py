@@ -47,7 +47,6 @@ class ReminderUpdateSchema(BaseModel):
     '''
     id: int = 1
     name: Optional[str] = 'Ir no dentista'
-    name_normalized: str = 'ir no dentista'
     description: Optional[str] = 'Marcar o retorno da consulta'
     due_date: Optional[datetime] = '2023-10-20T00:00:00.000Z'
     send_email: Optional[bool] = True
